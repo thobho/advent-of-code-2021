@@ -1,6 +1,6 @@
 package com.thobho
 
-import com.thobho.Utils.readInput
+import com.thobho.Utils.readInputIntLines
 
 import scala.annotation.tailrec
 import scala.io.Source
@@ -23,7 +23,7 @@ object Day1 {
   def solvePatTwo: List[Int] => (List[Int], Int) = windowedSum _ andThen solve(0)
 
   def main(args: Array[String]): Unit = {
-    val input = readInput()
+    val input = readInputIntLines(inputPath)
     val partOneResult = solve(0)(input)._2
     val partTwoResult = solvePatTwo(input)._2
     println(partOneResult)

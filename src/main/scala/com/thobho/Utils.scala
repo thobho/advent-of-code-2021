@@ -3,12 +3,17 @@ package com.thobho
 import com.thobho.Day1.inputPath
 
 import scala.io.Source
+import scala.util.Using
 
 object Utils {
-  def readInput(): List[Int] = {
-    val source = Source.fromFile(inputPath)
-    val result = source.getLines().map(number => number.toInt).toList
-    source.close()
-    result
+
+  def readInputLines(inputPath: String): List[String] = {
+    Using(Source.fromFile(inputPath)) { source =>
+      source.getLines().toList
+    }.get
+  }
+
+  def readInputIntLines(inputPath: String): List[Int] = {
+    readInputLines(inputPath).map(number => number.toInt)
   }
 }
