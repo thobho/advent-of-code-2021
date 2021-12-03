@@ -28,7 +28,7 @@ object Day3Part2 {
   def main(args: Array[String]): Unit = {
     val input = readInputLines(inputPath)
     val oxygen = determineColumn(input, 0, _ > _).head
-    val co2 = determineColumn(input, 0, _ < _).head
+    val co2 = determineColumn(input, 0, _ <= _).head
     println(toDecimal(oxygen) * toDecimal(co2))
   }
 }
