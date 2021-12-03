@@ -10,17 +10,17 @@ object Day3 {
   private val sequenceLength = 12
   private val emptyCounts = List.fill(sequenceLength)(0)
 
-  def addBits(sequence: String, bitCounts:List[Int], bitToCount: Char): List[Int] =
+  def addBitsToBitCountList(sequence: String, bitCounts:List[Int], bitToCount: Char): List[Int] =
     sequence.toCharArray.zip(bitCounts)
       .map { case (bit, count) => if (bit == bitToCount) count + 1 else count}
       .toList
 
   def countBits(sequences: List[String], bitToCount: Char): List[Int] =
-    sequences.foldLeft(emptyCounts)((counts, nextSequence) => addBits(nextSequence, counts, bitToCount))
+    sequences.foldLeft(emptyCounts)((counts, nextSequence) => addBitsToBitCountList(nextSequence, counts, bitToCount))
 
   def generateBinary(input: List[String], operation: BiFunction[Int, Int, Boolean]): Int = {
     val binaryAsString = countBits(input, '1').zip(countBits(input, '0'))
-      .map(oneAndZeroCounts => if (operation.apply(oneAndZeroCounts._1, oneAndZeroCounts._2)) "1" else "0")
+      .map(oneAndZeroCounts => if (operation(oneAndZeroCounts._1, oneAndZeroCounts._2)) "1" else "0")
       .reduce(_+_)
     toDecimal(binaryAsString)
   }
@@ -33,5 +33,4 @@ object Day3 {
     val kappa = generateBinary(input, _ < _)
     print(gamma * kappa)
   }
-
 }
