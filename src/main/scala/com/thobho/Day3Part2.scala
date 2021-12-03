@@ -11,7 +11,7 @@ object Day3Part2 {
   private val inputPath = "resources/day-3-input.txt"
 
   @tailrec
-  def determineColumn(binaryStrings: List[String], position: Int, operation: BiFunction[Int, Int, Boolean]): List[String] = {
+  def calculate(binaryStrings: List[String], position: Int, operation: BiFunction[Int, Int, Boolean]): List[String] = {
         binaryStrings match {
           case head::Nil => List(head)
           case _ =>
@@ -19,7 +19,7 @@ object Day3Part2 {
             val onesCount = countBits(binaryStrings, '1')(position)
             val searchedValues = if(operation(zerosCount, onesCount)) '0' else '1'
             val result = binaryStrings.filter(binaryString => hasBitOnPosition(binaryString, position, searchedValues))
-            determineColumn(result, position + 1, operation)
+            calculate(result, position + 1, operation)
         }
   }
 
@@ -27,8 +27,8 @@ object Day3Part2 {
 
   def main(args: Array[String]): Unit = {
     val input = readInputLines(inputPath)
-    val oxygen = determineColumn(input, 0, _ > _).head
-    val co2 = determineColumn(input, 0, _ <= _).head
+    val oxygen = calculate(input, 0, _ > _).head
+    val co2 = calculate(input, 0, _ <= _).head
     println(toDecimal(oxygen) * toDecimal(co2))
   }
 }
