@@ -60,7 +60,7 @@ object Day4 {
   @tailrec
   def findRec(params: SearchParams): SearchParams = {
     val (numberToCrossOut, currentNumber, notWining, winning) = params
-    if(notWining.isEmpty){
+    if(notWining.isEmpty){ //winning.size == 1 for part one of exercise
        (numberToCrossOut, currentNumber, notWining, winning)
     } else {
       val (newWinningBoards, newNotWiningBoards) = crossFromBoards(numberToCrossOut.head, notWining)
