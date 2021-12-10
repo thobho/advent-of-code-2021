@@ -1,11 +1,9 @@
 package com.thobho
 
 import Utils.readInputLines
-
-
+//bruteforce
 object Day8 {
   private val inputPath = "resources/day-8-input.txt"
-
 
   val segmentNumberEncoding = Map(
     0 -> List(0,1,2,4,5,6),
@@ -44,6 +42,7 @@ object Day8 {
       .head._1.toString
 
   def main(args: Array[String]): Unit = {
+    val start = System.currentTimeMillis()
     val result = readInputLines(inputPath)
       .map(line => line.split(" \\| "))
       .map(splitedArr => (splitedArr(0), splitedArr(1)))
@@ -56,5 +55,6 @@ object Day8 {
       .sum
 
     println(result)
+    println(System.currentTimeMillis() - start)
   }
 }
