@@ -3,41 +3,85 @@ package com.thobho
 object Day9 {
   private val inputPath = "resources/day-9-input.txt"
 
-  object Cell{
-    type NeighbourFinder = (input: Array[Array[Int]], rowIndex: Int, columnIndex:Int) => List[Int]
-    private val bottom: NeighbourFinder = (input, rowIndex, columnIndex) =>
-      if(rowIndex < input.length - 1) List(input(rowIndex + 1)(columnIndex)) else Nil
-    private val upper: NeighbourFinder = (input, rowIndex, columnIndex) =>
-      if(rowIndex != 0) List(input(rowIndex - 1)(columnIndex)) else Nil
-    private val left: NeighbourFinder = (input, rowIndex, columnIndex) =>
-      if(columnIndex != 0) List(input(rowIndex)(columnIndex - 1)) else Nil
-    private val right: NeighbourFinder = (input, rowIndex, columnIndex) =>
-      if(columnIndex < input(0).length - 1) List(input(rowIndex)(columnIndex + 1)) else Nil
+  type SeaFlorMap = Array[Array[Int]]
+  type Position = (Int, Int)
+  type CellValue = Int
+  type Cell = (Position, CellValue)
+  type CellWithNeighbours = (Position,CellValue,List[Cell])
+  type NeighbourFinder = (input: SeaFlorMap, r: Int, c:Int) => List[Cell]
 
-    val combinedFinders: NeighbourFinder = (input, rowIndex, columnIndex) =>
-      List(upper, bottom, left, right).flatMap(_(input, rowIndex, columnIndex))
-  }
+  val bottom: NeighbourFinder = (input, r, c) =>
+    if(r < input.length - 1) List(((r + 1, c), (input(r + 1)(c)))) else Nil
+  val upper: NeighbourFinder = (input, r, c) =>
+    if(r != 0) List((( r - 1, c), input(r - 1)(c))) else Nil
+  val left: NeighbourFinder = (input, r, c) =>
+    if(c != 0) List(((r, c - 1), input(r)(c - 1))) else Nil
+  val right: NeighbourFinder = (input, r, c) =>
+    if(c < input(0).length - 1) List(((r, c + 1), input(r)(c + 1))) else Nil
 
-  case class Cell(row: Int, column: Int, value: Int, neighbourValues: List[Int])
+  def findNeighbours(input: SeaFlorMap, position: Position): List[Cell] =
+      List(upper, bottom, left, right).flatMap(_(input, position._1, position._2))
 
-  def createCell(input: Array[Array[Int]], rowIndex: Int, columnIndex:Int): Cell =
-    Cell(rowIndex, columnIndex, input(rowIndex)(columnIndex), Cell.combinedFinders(input, rowIndex, columnIndex))
 
-  def createCells(input: Array[Array[Int]]): IndexedSeq[Cell] =
+  def createCells(input: SeaFlorMap): IndexedSeq[CellWithNeighbours] =
     for {
       rowIndex <- input.indices
       columnIndex <- input(0).indices
-    } yield createCell(input, rowIndex, columnIndex)
+    } yield ((rowIndex, columnIndex), input(rowIndex)(columnIndex), findNeighbours(input, (rowIndex, columnIndex)))
+
+  def searchLowPoints(input: SeaFlorMap): List[CellWithNeighbours] = createCells(input).toList
+    .filter {
+      case (_, cellValue, neighbour) => neighbour.map {
+        case (_,neighbourValue) => neighbourValue > cellValue
+      }.reduce(_ && _)
+    }
+
+
+
+  def searchBasins(input: SeaFlorMap, lowPoints: List[CellWithNeighbours]): List[(Int, Int)] = {
+    Nil
+  }
+
+
+  def searchBasin(seeFloor: SeaFlorMap, current: Position, basin: Set[Position] = Set.empty, visited: Set[Position] = Set.empty) : (Set[Position], Set[Position]) = {
+    val (r,c) = current
+    val currentValue = seeFloor(r)(c)
+
+    val neighbours = findNeighbours(seeFloor, current)
+
+    val basinPart = neighbours
+      .filter { case (_, neighbourValue) => neighbourValue > currentValue }
+      .filter { case (_, value) => value != 9}
+      .map { case (position, _) => position}
+      .toSet
+
+    val newVisited = neighbours
+      .map { case (position, _) => position}
+      .toSet
+
+    val neighboursToSearch = basinPart &~ visited
+
+    if(neighboursToSearch.isEmpty) (basin, visited)
+    else {
+      neighboursToSearch
+        .map(nextNeighbour => searchBasin(seeFloor, nextNeighbour, basinPart | basin + current, visited | newVisited))
+        .reduce((left, right) => (left._1 | right._1, left._2 | right._2))
+    }
+  }
 
   def main(args: Array[String]): Unit = {
     val input = Utils.readInputLines(inputPath).toArray
       .map(row => row.map(_.toString.toInt).toArray)
 
-    val result = createCells(input)
-      .filter(cell => cell.neighbourValues.map(nv => nv > cell.value).reduce(_ && _))
-      .map(cell => cell.value + 1)
-      .sum
+    val result = searchLowPoints(input)
+      .map { case (position, _, _) => position }
+      .map (searchBasin(input, _))
+      .map (_._1)
+      .map (_.size)
+      .sortWith(_ > _)
+      .take(3)
+      .product
 
-    println(result)
+    print(result)
   }
 }
